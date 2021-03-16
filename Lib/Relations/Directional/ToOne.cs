@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib.Relations.Directional {
+namespace Nyeoglike.Lib.Relations.Directional {
     // NOTE: Unlike C#, we use "null" to represent "not found"
     //
     public abstract class ToOne<K, V>

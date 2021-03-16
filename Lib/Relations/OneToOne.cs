@@ -1,11 +1,11 @@
-﻿using Lib.Relations.Directional;
+﻿using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib.Relations {
+namespace Nyeoglike.Lib.Relations {
     public class OneToOne<A, B>
         where A: struct, IComparable<A>
         where B: struct, IComparable<B>

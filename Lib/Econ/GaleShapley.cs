@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib.Econ {
+namespace Nyeoglike.Lib.Econ {
     // null if this A would rather have no one than consider this O
     public delegate int? PrefLevel<A, O>(A a, O o); 
 

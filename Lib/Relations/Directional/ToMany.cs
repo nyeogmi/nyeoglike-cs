@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib.Relations.Directional {
+namespace Nyeoglike.Lib.Relations.Directional {
     public abstract class ToMany<K, V>
         where K: struct
         where V: struct

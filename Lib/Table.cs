@@ -1,33 +1,42 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib {
-    class Table<T> {
+namespace Nyeoglike.Lib {
+    public class Table<T> : IEnumerable<KeyValuePair<ID<T>, T>> {
         // TODO: Provide deleted-marking, but not actual deletion
-        private List<T> Ts;
-        
+        private List<T> _ts;
+
         public Table() {
-            Ts = new List<T>();
+            _ts = new List<T>();
         }
 
         public ID<T> Add(T t) {
-            var ix = Ts.Count;
-            Ts.Add(t);
+            var ix = _ts.Count;
+            _ts.Add(t);
 
             return new ID<T>(ix + 1);
+        }
+
+        public ID<T> Add(Func<ID<T>, T> f) {
+            var ix = _ts.Count;
+            var id = new ID<T>(ix + 1);
+            _ts.Add(f(id));
+
+            return id;
         }
 
         public T this[ID<T> id] {
             get {
                 var ix = CheckID(id);
-                return Ts[ix];
+                return _ts[ix];
             }
             set {
                 var ix = CheckID(id);
-                Ts[ix] = value;
+                _ts[ix] = value;
             }
         }
 
@@ -40,22 +49,35 @@ namespace Lib {
             if (ix < 0) {
                 throw new ArgumentException($"ID too low: {id}");
             }
-            if (ix >= Ts.Count) {
+            if (ix >= _ts.Count) {
                 throw new ArgumentException($"ID too high: {id}");
             }
             return ix;
         }
-    }
 
-    struct ID<T>: IComparable<ID<T>> {
-        public int Index { get; internal set; }
-
-        public bool Initialized => Index != 0;
-
-        internal ID(int index) {
-            Index = index;
+        public IEnumerator<KeyValuePair<ID<T>, T>> GetEnumerator() {
+            // TODO: Error when changes are made out from under me?
+            foreach (var i in Enumerable.Range(0, _ts.Count)) {
+                yield return KeyValuePair.Create(new ID<T>(i + 1), _ts[i]);
+            }
         }
 
-        public int CompareTo(ID<T> other) => Index.CompareTo(other.Index);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerable<ID<T>> Keys {
+            get {
+                foreach (var kv in this) { 
+                    yield return kv.Key; 
+                }
+            }
+        }
+
+        public IEnumerable<T> Values {
+            get {
+                foreach (var kv in this) { 
+                    yield return kv.Value; 
+                }
+            }
+        }
     }
 }

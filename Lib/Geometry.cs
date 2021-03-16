@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib {
-    struct V2 {
+namespace Nyeoglike.Lib {
+    public struct V2 {
         public int X, Y;
 
         public V2(int x, int y) {
@@ -48,8 +48,23 @@ namespace Lib {
                 }
             }
         }
+
+        public static bool operator ==(V2 one, V2 two) => one.X == two.X && one.Y == two.Y;
+        public static bool operator !=(V2 one, V2 two) => !(one == two);
+
+        public override bool Equals(object obj) {
+            if (!(obj is V2)) { return false; }
+            return this == (V2)obj;
+        }
+
+        public override int GetHashCode() {
+            int xhc = X.GetHashCode();
+            int yhc = Y.GetHashCode();
+            return (xhc << 16) ^ yhc ^ (xhc >> 16);
+        }
     }
-    struct R2 {
+
+    public struct R2 {
         public V2 Top, Size;
 
         public R2(int x0, int y0, int x1, int y1) {
@@ -91,5 +106,19 @@ namespace Lib {
 
         // TODO: Assert amt > 0?
         public R2 Expand(V2 amt) => new R2(Top - amt, Size + amt * 2);
+
+        public static bool operator ==(R2 one, R2 two) => one.Top == two.Top && one.Size == two.Size;
+        public static bool operator !=(R2 one, R2 two) => !(one == two);
+
+        public override bool Equals(object obj) {
+            if (!(obj is R2)) { return false;  }
+            return this == (R2)obj;
+        }
+
+        public override int GetHashCode() {
+            int xhc = Top.GetHashCode();
+            int yhc = Size.GetHashCode();
+            return (xhc << 8) ^ yhc ^ (xhc >> 24);
+        }
     }
 }
