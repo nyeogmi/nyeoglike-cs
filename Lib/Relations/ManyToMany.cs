@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Lib.Relations {
+    // TODO: EdgeManyToMany<A, E, B>
+    // Implement it as a ManyToMany<A, (B, E)> next to a ManyToMany<(A, E), B>
+
     public class ManyToMany<A, B>
         where A: struct, IComparable<A>
         where B: struct, IComparable<B>
