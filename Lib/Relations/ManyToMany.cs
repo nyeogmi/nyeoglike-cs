@@ -1,4 +1,5 @@
-﻿using Nyeoglike.Lib.Relations.Directional;
+﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,11 @@ namespace Nyeoglike.Lib.Relations {
         where A: struct, IComparable // <A>
         where B: struct, IComparable // <B>
     {
-        private ulong _tick;
-        private SortedDictionary<A, SortedSet<B>> _aToBs;
-        private SortedDictionary<B, SortedSet<A>> _bToAs;
+        private ulong _tick = 0;
+        private ManyMap<A, B> _aToBs = new();
+        private ManyMap<B, A> _bToAs = new();
         
         public ManyToMany() {
-            _tick = 0;
-            _aToBs = new SortedDictionary<A, SortedSet<B>>();
-            _bToAs = new SortedDictionary<B, SortedSet<A>>();
         }
 
         public ViewForward Fwd => new ViewForward(this);
@@ -33,33 +31,14 @@ namespace Nyeoglike.Lib.Relations {
                 return false;
             }
 
-            if (!_aToBs.TryGetValue(a, out SortedSet<B> bs)) {
-                bs.Add(b);
-            }
-            else {
-                bs = new SortedSet<B>();
-                bs.Add(b);
-                _aToBs[a] = bs;
-            }
+            _aToBs.Add(a, b);
+            _bToAs.Add(b, a);
 
-            if (!_bToAs.TryGetValue(b, out SortedSet<A> as_)) {
-                as_.Add(a);
-            }
-            else {
-                as_ = new SortedSet<A>();
-                as_.Add(a);
-                _bToAs[b] = as_;
-            }
             return true;
         }
 
         public bool Contains(KeyValuePair<A, B> kv) => Contains(kv.Key, kv.Value);
-        public bool Contains(A a, B b) {
-            if (_aToBs.TryGetValue(a, out SortedSet<B> oldBs)) {
-                return oldBs.Contains(b);
-            }
-            return false;
-        }
+        public bool Contains(A a, B b) => _aToBs.Contains(a, b);
 
         private bool ContainsA(A a) => _aToBs.ContainsKey(a);
         private bool ContainsB(B b) => _bToAs.ContainsKey(b);
@@ -71,34 +50,28 @@ namespace Nyeoglike.Lib.Relations {
                 return false;
             }
 
-            var bs = _aToBs[a];
-            bs.Remove(b);
-            if (!bs.Any()) {
-                _aToBs.Remove(a);
-            }
+            _aToBs.Remove(a, b);
+            _bToAs.Remove(b, a);
 
-            var as_ = _bToAs[b];
-            as_.Remove(a);
-            if (!as_.Any()) {
-                _bToAs.Remove(b);
-            }
             return true;
         }
 
         private SortedSet<B> PopA(A a) {
             _tick++;
-            if (_aToBs.Remove(a, out SortedSet<B> bs)) {
-                return bs;
+            var bs = _aToBs.PopKey(a);
+            foreach (var b in bs) {
+                _bToAs.Remove(b, a);
             }
-            return null;
+            return bs;
         }
 
         private SortedSet<A> PopB(B b) {
             _tick++;
-            if (_bToAs.Remove(b, out SortedSet<A> as_)) {
-                return as_;
+            var as_ = _bToAs.PopKey(b);
+            foreach (var a in as_) {
+                _aToBs.Remove(a, b);
             }
-            return null;
+            return as_;
         }
 
         private Many<B> GetBsFromA(A a) => new ViewManyForward(this, a);
@@ -106,24 +79,20 @@ namespace Nyeoglike.Lib.Relations {
 
         private IEnumerable<B> AllBsFromA(A a) {
             var _old = _tick;
-            if (_aToBs.TryGetValue(a, out SortedSet<B> bs)) {
-                foreach (var b in bs) {
-                    yield return b;
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var b in _aToBs[a]) {
+                yield return b;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }
 
         private IEnumerable<A> AllAsFromB(B b) {
             var _old = _tick;
-            if (_bToAs.TryGetValue(b, out SortedSet<A> as_)) {
-                foreach (var a in as_) {
-                    yield return a;
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var a in _bToAs[b]) {
+                yield return a;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }
@@ -131,12 +100,10 @@ namespace Nyeoglike.Lib.Relations {
         private IEnumerable<KeyValuePair<A, B>> AllAPairs() {
             var _old = _tick;
 
-            foreach (var abs in _aToBs) {
-                foreach (var b in abs.Value) {
-                    yield return new KeyValuePair<A, B>(abs.Key, b);
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var ab in _aToBs) {
+                yield return ab;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }
@@ -144,12 +111,10 @@ namespace Nyeoglike.Lib.Relations {
         private IEnumerable<KeyValuePair<B, A>> AllBPairs() {
             var _old = _tick;
 
-            foreach (var bas in _bToAs) {
-                foreach (var a in bas.Value) {
-                    yield return new KeyValuePair<B, A>(bas.Key, a);
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var ba in _bToAs) {
+                yield return ba;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }

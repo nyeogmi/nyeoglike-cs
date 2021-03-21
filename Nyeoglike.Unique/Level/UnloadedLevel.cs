@@ -11,12 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nyeoglike.Unique.WorldMap;
+using Nyeoglike.Lib.FS;
 
 namespace Nyeoglike.Unique.Level {
     public class UnloadedLevel {
         public V2 PlayerStart;
         public Terrain Terrain;
-        public UncheckedToMany<V2, Item> Items;
+        public IxManyMap<V2, Item> Items;
         public ManyToMany<V2, SpawnType> SpawnType;
         public Action<World, LoadedLevel> EphemeraSource;
 

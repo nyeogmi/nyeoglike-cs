@@ -1,4 +1,5 @@
-﻿using Nyeoglike.Lib.Relations.Directional;
+﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +11,11 @@ namespace Nyeoglike.Lib.Relations {
         where A: struct, IComparable // <A>
         where B: struct, IComparable // <B>
     {
-        private ulong _tick;
-        private SortedDictionary<A, B> _aToB;
-        private SortedDictionary<B, SortedSet<A>> _bToAs;
+        private ulong _tick = 0;
+        private Map<A, B> _aToB = new();
+        private ManyMap<B, A> _bToAs = new();
         
         public ManyToOne() {
-            _tick = 0;
-            _aToB = new SortedDictionary<A, B>();
-            _bToAs = new SortedDictionary<B, SortedSet<A>>();
         }
 
         public ViewForward Fwd => new ViewForward(this);
@@ -35,25 +33,14 @@ namespace Nyeoglike.Lib.Relations {
                 Remove(a, oldB.Value);
             }
 
-            _aToB[a] = b;
-            if (_bToAs.TryGetValue(b, out SortedSet<A> as_)) {
-                as_.Add(a);
-            }
-            else {
-                as_ = new SortedSet<A>();
-                as_.Add(a);
-                _bToAs[b] = as_;
-            }
+            _aToB.Add(a, b);
+            _bToAs.Add(b, a);
+
             return true;
         }
 
         public bool Contains(KeyValuePair<A, B> kv) => Contains(kv.Key, kv.Value);
-        public bool Contains(A a, B b) {
-            if (_aToB.TryGetValue(a, out B oldB)) {
-                return oldB.Equals(b);
-            }
-            return false;
-        }
+        public bool Contains(A a, B b) => _aToB.Contains(a, b); 
 
         private bool ContainsA(A a) => _aToB.ContainsKey(a);
         private bool ContainsB(B b) => _bToAs.ContainsKey(b);
@@ -66,11 +53,8 @@ namespace Nyeoglike.Lib.Relations {
             }
 
             _aToB.Remove(a);
-            var as_ = _bToAs[b];
-            as_.Remove(a);
-            if (!as_.Any()) {
-                _bToAs.Remove(b);
-            }
+            _bToAs.Remove(b, a);
+
             return true;
         }
 
@@ -84,10 +68,11 @@ namespace Nyeoglike.Lib.Relations {
 
         private SortedSet<A> PopB(B b) {
             _tick++;
-            if (_bToAs.Remove(b, out SortedSet<A> as_)) {
-                return as_;
+            var as_ = _bToAs.PopKey(b);
+            foreach (var a in as_) {
+                _aToB.Remove(a);
             }
-            return new SortedSet<A>();
+            return as_;
         }
 
         private Nullable<B> GetBFromA(A a) {
@@ -101,12 +86,10 @@ namespace Nyeoglike.Lib.Relations {
 
         private IEnumerable<A> AllAsFromB(B b) {
             var _old = _tick;
-            if (_bToAs.TryGetValue(b, out SortedSet<A> as_)) {
-                foreach (var a in as_) {
-                    yield return a;
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var a in _bToAs[b]) {
+                yield return a;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }
@@ -125,12 +108,10 @@ namespace Nyeoglike.Lib.Relations {
         private IEnumerable<KeyValuePair<B, A>> AllBPairs() {
             var _old = _tick;
 
-            foreach (var bas in _bToAs) {
-                foreach (var a in bas.Value) {
-                    yield return new KeyValuePair<B, A>(bas.Key, a);
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var ba in _bToAs) {
+                yield return ba;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }

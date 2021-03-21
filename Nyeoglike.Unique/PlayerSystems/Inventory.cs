@@ -1,4 +1,5 @@
-﻿using Nyeoglike.Lib.Relations;
+﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.Relations;
 using Nyeoglike.Unique.Items;
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace Nyeoglike.Unique.PlayerSystems {
     public class Inventory {
-        private UncheckedToOne<Resource, int> _resources = new(); 
+        private DefaultMap<Resource, int> _resources = new(0); 
 
         public Inventory() {
-            _resources[]
+            // for now
+            _resources[Resource.Money] = 10000;
         }
     }
 }

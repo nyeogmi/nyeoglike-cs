@@ -1,4 +1,5 @@
-﻿using Nyeoglike.Lib.Relations.Directional;
+﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,11 @@ namespace Nyeoglike.Lib.Relations {
         where A: struct, IComparable // <A>
         where B: struct, IComparable // <B>
     {
-        private ulong _tick;
-        private SortedDictionary<A, SortedSet<B>> _aToBs;
-        private SortedDictionary<B, A> _bToA;
+        private ulong _tick = 0;
+        private ManyMap<A, B> _aToBs = new();
+        private Map<B, A> _bToA = new();
         
-        public OneToMany() {
-            _tick = 0;
-            _aToBs = new SortedDictionary<A, SortedSet<B>>();
-            _bToA = new SortedDictionary<B, A>();
-        }
+        public OneToMany() { }
 
         public ViewForward Fwd => new ViewForward(this);
         public ViewReverse Rev => new ViewReverse(this);
@@ -35,25 +32,14 @@ namespace Nyeoglike.Lib.Relations {
                 Remove(oldA.Value, b);
             }
 
-            _bToA[b] = a;
-            if (_aToBs.TryGetValue(a, out SortedSet<B> bs)) {
-                bs.Add(b);
-            }
-            else {
-                bs = new SortedSet<B>();
-                bs.Add(b);
-                _aToBs[a] = bs;
-            }
+            _aToBs.Add(a, b);
+            _bToA.Add(b, a);
+
             return true;
         }
 
         public bool Contains(KeyValuePair<A, B> kv) => Contains(kv.Key, kv.Value);
-        public bool Contains(A a, B b) { 
-            if (_bToA.TryGetValue(b, out A oldA)) {
-                return oldA.Equals(a);
-            }
-            return false;
-        }
+        public bool Contains(A a, B b) => _bToA.Contains(b, a); 
 
         private bool ContainsA(A a) => _aToBs.ContainsKey(a);
         private bool ContainsB(B b) => _bToA.ContainsKey(b);
@@ -65,21 +51,19 @@ namespace Nyeoglike.Lib.Relations {
                 return false;
             }
 
-            var bs = _aToBs[a];
-            bs.Remove(b);
-            if (!bs.Any()) {
-                _aToBs.Remove(a);
-            }
+            _aToBs.Remove(a, b);
             _bToA.Remove(b);
+
             return true;
         }
 
         private SortedSet<B> PopA(A a) {
             _tick++;
-            if (_aToBs.Remove(a, out SortedSet<B> bs)) {
-                return bs;
+            var bs = _aToBs.PopKey(a);
+            foreach (var b in bs) {
+                _bToA.Remove(b);
             }
-            return new SortedSet<B>();
+            return bs;
         }
 
         private Nullable<A> PopB(B b) {
@@ -100,12 +84,10 @@ namespace Nyeoglike.Lib.Relations {
 
         private IEnumerable<B> AllBsFromA(A a) {
             var _old = _tick;
-            if (_aToBs.TryGetValue(a, out SortedSet<B> bs)) {
-                foreach (var b in bs) {
-                    yield return b;
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var b in _aToBs[a]) {
+                yield return b;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }
@@ -113,12 +95,10 @@ namespace Nyeoglike.Lib.Relations {
         private IEnumerable<KeyValuePair<A, B>> AllAPairs() {
             var _old = _tick;
 
-            foreach (var abs in _aToBs) {
-                foreach (var b in abs.Value) {
-                    yield return new KeyValuePair<A, B>(abs.Key, b);
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
+            foreach (var ab in _aToBs) {
+                yield return ab;
+                if (_tick != _old) {
+                    throw new InvalidOperationException("cannot iterate: underlying object changed");
                 }
             }
         }

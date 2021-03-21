@@ -1,4 +1,5 @@
 ﻿using Nyeoglike.Lib;
+using Nyeoglike.Lib.FS;
 using Nyeoglike.Lib.Relations;
 using Nyeoglike.Unique.Level;
 using Nyeoglike.Unique.WorldMap;
@@ -6,16 +7,16 @@ using System;
 
 namespace Nyeoglike.Unique.NPCSystems.Scheduling {
     public class Schedule {
-        private UncheckedToOne<ID<NPC>, ScheduleItem> _items = new();
+        private NullMap<ID<NPC>, ScheduleItem> _items = new();
         private OneToOne<ID<NPC>, ID<UnloadedLevel>> _calculatedLocation = new();
         private OneToMany<ID<NPC>, ID<NPC>> _calculatedLocationDetermines = new();
 
         // TODO: Do something smart when these fail
         public ScheduleItem this[ID<NPC> id] {
-            get => _items.Fwd[id].Value;
+            get => _items[id].Value;
             set {
                 Remove(id);
-                _items.Fwd[id] = value;
+                _items[id] = value;
             }
         }
 

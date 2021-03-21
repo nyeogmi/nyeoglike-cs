@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib.FS {
-    public class ManyMap<K, V> 
+    public class ManyMap<K, V> : IEnumerable<KeyValuePair<K, V>>
         where K: IComparable
         where V: IComparable
     {
@@ -82,6 +83,23 @@ namespace Nyeoglike.Lib.FS {
                 }
             }
         }
+
+        public IEnumerator<KeyValuePair<K, V>> GetEnumerator() {
+            var _old = _tick;
+
+            foreach (var kvs in _dictionary) {
+                var k = kvs.Key;
+                var vs = kvs.Value;
+                foreach (var v in vs) {
+                    yield return new(k, v);
+                    if (_tick != _old) {
+                        throw new InvalidOperationException("cannot iterate: underlying object changed");
+                    }
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public class ViewMany : Many<V> {
             private ManyMap<K, V> _this;

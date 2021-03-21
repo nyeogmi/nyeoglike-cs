@@ -9,10 +9,9 @@ namespace Nyeoglike.Lib.FS {
             _impl = impl;
         }
 
-        public IEnumerator<V> GetEnumerator() => _impl.GetEnumerator();
-
         public bool Contains(V v) => _impl.Contains(v);
 
+        public IEnumerator<V> GetEnumerator() => _impl.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => _impl.GetEnumerator();
     }
 }
