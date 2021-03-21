@@ -1,5 +1,6 @@
 ﻿using Nyeoglike.Lib;
 using Nyeoglike.Unique.Events;
+using Nyeoglike.Unique.NPCSystems;
 using System;
 
 namespace Nyeoglike.Unique {

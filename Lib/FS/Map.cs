@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nyeoglike.Lib.FS.Hierarchy;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,13 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib.FS {
-    public class Map<K, V> : IEnumerable<KeyValuePair<K, V>>
+    public class Map<K, V> : IEnumerable<KeyValuePair<K, V>>, IPrimitive
         where K: IComparable
     {
         private ulong _tick = 0;
         private SortedDictionary<K, V> _dictionary = new();
         
-        public Map() { }
+        public Map(AnyNode node) {
+            node.Bind(this);
+        }
 
         // We don't require V: IComparable, meaning we have no idea if V is new
         // so: void
@@ -49,6 +52,14 @@ namespace Nyeoglike.Lib.FS {
         }
 
         public bool TryGetValue(K k, out V v) => _dictionary.TryGetValue(k, out v);
+
+        public string Dump() {
+            throw new NotImplementedException();
+        }
+
+        public void Load(string s) {
+            throw new NotImplementedException();
+        }
     }
 
     public static class MapOps {

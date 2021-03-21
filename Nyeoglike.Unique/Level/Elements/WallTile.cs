@@ -5,18 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nyeoglike.Unique.DisplayData.Icon;
 
 namespace Nyeoglike.Unique.Level.Elements {
-    public struct WallTile {
-        public char Disp1;
-        public char Disp2;
+    public struct WallTile: IComparable<WallTile>, IComparable { 
+        public DoubleWide Disp;
         public Color Fg;
         public Color Cap;
         public bool Flip;
 
         public static WallTile Default => new WallTile {
-            Disp1 = '\xb0',
-            Disp2 = '\xb0',
+            Disp = new DoubleWide('\xb0', '\xb0'),
             Fg = Colors.WorldFG,
             Cap = Colors.WorldFG,
             Flip = false
@@ -33,8 +32,7 @@ namespace Nyeoglike.Unique.Level.Elements {
                 case 1: disp1 = disp2 = '\xb1'; break;
             }
             return new WallTile {
-                Disp1 = disp1,
-                Disp2 = disp2,
+                Disp = new DoubleWide(disp1, disp2),
                 Fg = W.RNG.Choice(WallColors.All),
                 Cap = W.RNG.Choice(WallColors.All),
                 Flip = flip
@@ -53,8 +51,7 @@ namespace Nyeoglike.Unique.Level.Elements {
                 case 4: disp1 = disp2 = '\xcb'; break;
             }
             return new WallTile {
-                Disp1 = disp1,
-                Disp2 = disp2,
+                Disp = new DoubleWide(disp1, disp2),
                 Fg = W.RNG.Choice(WallColors.Colorful),
                 Cap = W.RNG.Choice(WallColors.All),
                 Flip = flip
@@ -63,8 +60,7 @@ namespace Nyeoglike.Unique.Level.Elements {
 
         public static WallTile GenerateTile() {
             return new WallTile {
-                Disp1 = '\xb2',
-                Disp2 = '\xb2',
+                Disp = new DoubleWide('\xb2', '\xb2'),
                 Fg = W.RNG.Choice(WallColors.Colorful),
                 Cap = W.RNG.Choice(WallColors.All),
                 Flip = false
@@ -73,12 +69,16 @@ namespace Nyeoglike.Unique.Level.Elements {
 
         public static WallTile GenerateBathroomTile() {
             return new WallTile {
-                Disp1 = '\xb2',
-                Disp2 = '\xb2',
+                Disp = new DoubleWide('\xb2', '\xb2'),
                 Fg = W.RNG.Choice(WallColors.Banal),
                 Cap = W.RNG.Choice(WallColors.Banal),
                 Flip = false
             };
+        }
+
+        public int CompareTo(object obj) => ((IComparable<WallTile>)this).CompareTo((WallTile)obj);
+        public int CompareTo(WallTile other) {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Nyeoglike.Lib;
+using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.FS.Hierarchy;
 using Nyeoglike.Unique.Events;
 using Nyeoglike.Unique.Level;
 using Nyeoglike.Unique.NPCSystems;
@@ -8,6 +10,7 @@ using Nyeoglike.Unique.PlayerSystems;
 using Nyeoglike.Unique.QuestSystem;
 using Nyeoglike.Unique.Time;
 using Nyeoglike.Unique.WorldMap;
+using static Nyeoglike.Unique.Globals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +33,15 @@ namespace Nyeoglike.Unique {
         public SceneFlags SceneFlags { get; private set; } = new();
 
         public LoadedLevel Level { get; private set; } = null;
-        public Player Player { get; private set; } = new();
+        public Box<Player> Player { get; private set; } = new(S.Root("player"));
+        public Inventory Inventory { get; private set; } = new();
 
         private bool _notifying = false;
         private Queue<Event> _notifyQueue = new();
 
         public World() {
+            // TODO: Do this after binding the store to a file, not on construction
+            Player.Default(new Player());
         }
 
         public World Generate() {
@@ -78,8 +84,8 @@ namespace Nyeoglike.Unique {
                 // TODO: Save previous level's status
             }
 
-            Player.Pos = level.PlayerStart;
-            Player.Cam = level.PlayerStart;
+            Player.X.Pos = level.PlayerStart;
+            Player.X.Cam = level.PlayerStart;
             Level = level.Load(location);
 
             // Notify them.

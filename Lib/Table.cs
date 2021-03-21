@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nyeoglike.Lib.FS.Hierarchy;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib {
-    public class Table<T> : IEnumerable<KeyValuePair<ID<T>, T>> {
+    public class Table<T> : IEnumerable<KeyValuePair<ID<T>, T>>, IPrimitive {
         // TODO: Provide deleted-marking, but not actual deletion
         private List<T> _ts;
 
-        public Table() {
+        public Table(AnyNode node) {
+            node.Bind(this);
             _ts = new List<T>();
         }
 
@@ -63,6 +65,14 @@ namespace Nyeoglike.Lib {
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public string Dump() {
+            throw new NotImplementedException();
+        }
+
+        public void Load(string s) {
+            throw new NotImplementedException();
+        }
 
         public IEnumerable<ID<T>> Keys {
             get {

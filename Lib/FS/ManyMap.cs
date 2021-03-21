@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nyeoglike.Lib.FS.Hierarchy;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,14 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib.FS {
-    public class ManyMap<K, V> : IEnumerable<KeyValuePair<K, V>>
+    public class ManyMap<K, V> : IEnumerable<KeyValuePair<K, V>>, IPrimitive
         where K: IComparable
         where V: IComparable
     {
         private ulong _tick = 0;
         private SortedDictionary<K, SortedSet<V>> _dictionary = new();
         
-        public ManyMap() { } 
+        public ManyMap(AnyNode node) {
+            node.Bind(this);
+        } 
 
         public bool Add(K k, V v) {
             _tick++;
@@ -100,6 +103,14 @@ namespace Nyeoglike.Lib.FS {
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public string Dump() {
+            throw new NotImplementedException();
+        }
+
+        public void Load(string s) {
+            throw new NotImplementedException();
+        }
 
         public class ViewMany : Many<V> {
             private ManyMap<K, V> _this;

@@ -1,4 +1,5 @@
 ﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.FS.Hierarchy;
 using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,14 @@ namespace Nyeoglike.Lib.Relations {
         where A: struct, IComparable // <A>
         where B: struct, IComparable // <B>
     {
-        private ulong _tick = 0;
-        private Map<A, B> _aToB = new();
-        private ManyMap<B, A> _bToAs = new();
+        private ulong _tick;
+        private Map<A, B> _aToB;
+        private ManyMap<B, A> _bToAs;
         
-        public ManyToOne() {
+        public ManyToOne(AnyNode node) {
+            _tick = 0;
+            _aToB = new(node.GenericSub("fwd"));
+            _bToAs = new(node.GenericSub("rev"));
         }
 
         public ViewForward Fwd => new ViewForward(this);

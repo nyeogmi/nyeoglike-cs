@@ -1,10 +1,12 @@
 ﻿using Nyeoglike.Lib;
+using Nyeoglike.Unique.Items;
+using Nyeoglike.Unique.NPCSystems;
+using Nyeoglike.Unique.PlayerSystems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using static Nyeoglike.Unique.Globals;
 
 namespace Nyeoglike.Unique.Events {
@@ -77,13 +79,13 @@ namespace Nyeoglike.Unique.Events {
         // TODO: Accessor for accepted quests?
 
         public ID<NPC>? WhoWants(Item item) {
-            var claimBox = new ClaimBox(World.Inventory.Claims, item, true);
+            var claimBox = new ClaimBox(item, true);
             try {
                 Notify(new Event(Verb.Claim, new ClaimBoxArg(claimBox)));
                 return null;
             } 
             catch (HypotheticalClaimException hce) {
-                return Active[hce.Claimant].QuestStatus().Assigner;
+                return Active[hce.Claimant].QuestStatus()?.Assigner;
             }
         }
 
@@ -101,7 +103,7 @@ namespace Nyeoglike.Unique.Events {
 
                 bool shouldNotify;
                 if (evt.Verb.QuestOnly()) {
-                    shouldNotify = questStatus && questStatus.Outcome == QuestOutcome.InProgress;
+                    shouldNotify = questStatus?.Outcome == QuestOutcome.InProgress;
 
                     if (evt.Verb == Verb.Claim && !_acceptedQuests.Contains(id)) {
                         shouldNotify = false;
@@ -137,7 +139,7 @@ namespace Nyeoglike.Unique.Events {
 
                 if (
                     evt.Verb == Verb.Claim && (
-                        from arg in evt.args
+                        from arg in evt.Args
                         where arg is ClaimBoxArg
                         let v = ((ClaimBoxArg) arg).Value
                         select v 
@@ -161,7 +163,7 @@ namespace Nyeoglike.Unique.Events {
             }
             else if (_acceptedQuests.Contains(id) || questStatus.Outcome == QuestOutcome.Succeeded) {
                 // Show the user a success even if they didn't accept it
-                World.Pushes.Send(id, PushReason.FinalizeQuest, questStatus.Assigner);
+                W.Pushes.Send(id, PushReason.FinalizeQuest, questStatus.Assigner);
             }
             else {
                 // Don't wait for the user

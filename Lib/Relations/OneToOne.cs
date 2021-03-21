@@ -1,4 +1,6 @@
-﻿using Nyeoglike.Lib.Relations.Directional;
+﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.FS.Hierarchy;
+using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +13,13 @@ namespace Nyeoglike.Lib.Relations {
         where B: struct, IComparable // <B>
     {
         private ulong _tick;
-        private SortedDictionary<A, B> _aToB;
-        private SortedDictionary<B, A> _bToA;
+        private Map<A, B> _aToB;
+        private Map<B, A> _bToA;
         
-        public OneToOne() {
+        public OneToOne(AnyNode node) {
             _tick = 0;
-            _aToB = new SortedDictionary<A, B>();
-            _bToA = new SortedDictionary<B, A>();
+            _aToB = new(node.GenericSub("fwd"));
+            _bToA = new(node.GenericSub("rev"));
         }
 
         public ViewForward Fwd => new ViewForward(this);

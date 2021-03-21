@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nyeoglike.Lib.FS.Hierarchy;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,11 @@ namespace Nyeoglike.Lib.FS {
         where K: IComparable
         where V: struct
     {
-        private Map<K, V> _map = new();
+        private Map<K, V> _map;
         
-        public NullMap() { }
+        public NullMap(AnyNode node) {
+            _map = new(node);
+        }
 
         // We don't require V: IComparable, meaning we have no idea if V is new
         // so: void

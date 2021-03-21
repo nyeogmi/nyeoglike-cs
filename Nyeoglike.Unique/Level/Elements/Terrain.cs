@@ -1,4 +1,5 @@
 ﻿using Nyeoglike.Lib;
+using Nyeoglike.Lib.FS;
 using Nyeoglike.Lib.Relations;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,6 @@ namespace Nyeoglike.Unique.Level.Elements {
     public class Terrain {
         public Wallpaper Wallpaper;
         public SortedSet<V2> InBounds;
-        public UncheckedToOne<V2, Block> Blocks;
+        public Map<V2, Block> Blocks;
     }
 }

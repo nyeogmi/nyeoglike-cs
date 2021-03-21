@@ -5,12 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nyeoglike.Unique.NPCSystems;
 
 namespace Nyeoglike.Unique {
     public class Pushes {
-        public DropTable<Push> Active = new();
+        public DropTable<Push> Active;
 
-        public Pushes() { }
+        public Pushes() {
+            var root = S.Root("pushes");
+            Active = new(root.Sub("active"));
+        }
 
         public ID<Push> Send(
             string message,

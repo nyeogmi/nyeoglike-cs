@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.FS.Hierarchy;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,11 +9,11 @@ using System.Threading.Tasks;
 namespace Nyeoglike.Lib {
     public class DropTable<T> : IEnumerable<KeyValuePair<ID<T>, T>> {
         // TODO: Provide deleted-marking, but not actual deletion
-        private SortedDictionary<ID<T>, T> _ts;
+        private Map<ID<T>, T> _ts;
         private int _next;
 
-        public DropTable() {
-            _ts = new();
+        public DropTable(AnyNode node) {
+            _ts = new(node);
             _next = 1;
         }
 
@@ -37,8 +39,12 @@ namespace Nyeoglike.Lib {
         public bool TryGetValue(ID<T> id, out T t) =>
             _ts.TryGetValue(CheckID(id), out t);
 
-        public T GetValueOrDefault(ID<T> id, T @default) =>
-            _ts.GetValueOrDefault(CheckID(id), @default);
+        public T GetValueOrDefault(ID<T> id, T @default) {
+            if (_ts.TryGetValue(CheckID(id), out T t)) {
+                return t;
+            }
+            return @default;
+        }
 
         public T ForceGetValue(ID<T> id) {
             if (_ts.TryGetValue(CheckID(id), out T t)) {
@@ -48,7 +54,10 @@ namespace Nyeoglike.Lib {
         }
 
         public T this[ID<T> id] { 
-            // TODO: get?
+            get {
+                id = CheckID(id);
+                return _ts[id];
+            }
             set {
                 id = CheckID(id);
                 _ts[id] = value;
@@ -60,12 +69,8 @@ namespace Nyeoglike.Lib {
                 throw new ArgumentException($"ID must be initialized: {id}");
             }
 
-            var ix = id.Index - 1;
-            if (ix < 0) {
-                throw new ArgumentException($"ID too low: {id}");
-            }
-            if (ix >= _ts.Count) {
-                throw new ArgumentException($"ID too high: {id}");
+            if (!_ts.ContainsKey(id)) {
+                throw new ArgumentException($"must already contain ID: {id}");
             }
             return id;
         }

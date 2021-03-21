@@ -12,6 +12,11 @@ namespace Nyeoglike.Lib.Econ {
         private PrefLevel<X, Y> _prefXY; 
         private PrefLevel<Y, X> _prefYX;
 
+        public GaleShapley(PrefLevel<X, Y> prefXY, PrefLevel<Y, X> prefYX) {
+            _prefXY = prefXY;
+            _prefYX = prefYX;
+        }
+
         public struct Pair {
             int X, Y;
 

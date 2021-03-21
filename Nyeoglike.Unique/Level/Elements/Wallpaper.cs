@@ -1,16 +1,21 @@
 ﻿using Nyeoglike.Lib;
+using Nyeoglike.Lib.FS;
+using Nyeoglike.Lib.FS.Hierarchy;
 using Nyeoglike.Lib.Relations;
 using System.Collections.Generic;
 
 namespace Nyeoglike.Unique.Level.Elements {
     public class Wallpaper {
-        public WallTile Default;
-        private Table<WallTile> _tiles = new();
-        private Dictionary<WallTile, ID<WallTile>> _existing = new();
-        private OneToOne<V2, ID<WallTile>> _layered = new();
+        public Box<WallTile> Default;
+        private Table<WallTile> _tiles;
+        private Map<WallTile, ID<WallTile>> _existing;
+        private OneToOne<V2, ID<WallTile>> _layered;
 
-        public Wallpaper(WallTile @default) {
-            Default = @default;
+        public Wallpaper(Node<Temporary> node, WallTile @default) {
+            Default = new(node.Sub("wallpaper")); Default.Default(@default);
+            _tiles = new(node.Sub("tiles"));
+            _existing = new(node.Sub("existing"));
+            _layered = new(node.Sub("layered"));
         }
 
         public void Add(WallTile wt, IEnumerable<V2> cells) {
@@ -25,7 +30,7 @@ namespace Nyeoglike.Unique.Level.Elements {
             get {
                 var here = _layered.Fwd[v];
                 if (here.HasValue) { return _tiles[here.Value]; }
-                return Default;
+                return Default.X;
             }
             set {
                 Add(value, new[] { v });

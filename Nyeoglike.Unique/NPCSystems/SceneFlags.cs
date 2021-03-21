@@ -9,12 +9,16 @@ using System.Threading.Tasks;
 using Nyeoglike.Unique.Events;
 using Nyeoglike.Lib.Relations.Directional;
 using Nyeoglike.Unique.NPCSystems.Scheduling;
+using Nyeoglike.Lib.FS;
 
 namespace Nyeoglike.Unique.NPCSystems {
     public class SceneFlags {
-        private ManyToMany<ID<NPC>, SceneFlag> _npcSceneFlags = new();
+        private ManyToMany<ID<NPC>, SceneFlag> _npcSceneFlags;
 
-        public SceneFlags() { }
+        public SceneFlags() {
+            var root = S.Root("sceneFlags");
+            _npcSceneFlags = new(root.Sub("npcSceneFlags"));
+        }
 
         public void Add(ID<NPC> id, SceneFlag sceneFlag) {
             if (_npcSceneFlags.Fwd[id].Add(sceneFlag)) {
@@ -26,7 +30,10 @@ namespace Nyeoglike.Unique.NPCSystems {
         public ManyRO<SceneFlag> this[ID<NPC> id] => _npcSceneFlags.Fwd[id].RO;
 
         public void Reset() {
-            _npcSceneFlags = new();
+            // TODO: Clear method?
+            foreach (var npc in _npcSceneFlags.Fwd.Keys.ToList()) {
+                _npcSceneFlags.Fwd.Remove(npc);
+            }
         }
 
         public void Notify(Event evt) {
