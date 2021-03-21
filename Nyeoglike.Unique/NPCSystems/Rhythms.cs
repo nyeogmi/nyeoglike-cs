@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nyeoglike.Unique.Biology {
+namespace Nyeoglike.Unique.NPCSystems {
     /*
 # Notes:
 # Each "_quantity" is 4 hours worth.

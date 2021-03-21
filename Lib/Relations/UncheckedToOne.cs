@@ -6,22 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib.Relations {
-    public class ManyToOne<A, B>
+    public class UncheckedToOne<A, B>
         where A: struct, IComparable // <A>
-        where B: struct, IComparable // <B>
+        where B: struct
     {
         private ulong _tick;
         private SortedDictionary<A, B> _aToB;
-        private SortedDictionary<B, SortedSet<A>> _bToAs;
         
-        public ManyToOne() {
+        public UncheckedToOne() {
             _tick = 0;
             _aToB = new SortedDictionary<A, B>();
-            _bToAs = new SortedDictionary<B, SortedSet<A>>();
         }
 
         public ViewForward Fwd => new ViewForward(this);
-        public ViewReverse Rev => new ViewReverse(this);
 
         public bool Add(A a, B b) {
             _tick++;
@@ -36,14 +33,6 @@ namespace Nyeoglike.Lib.Relations {
             }
 
             _aToB[a] = b;
-            if (_bToAs.TryGetValue(b, out SortedSet<A> as_)) {
-                as_.Add(a);
-            }
-            else {
-                as_ = new SortedSet<A>();
-                as_.Add(a);
-                _bToAs[b] = as_;
-            }
             return true;
         }
 
@@ -56,7 +45,6 @@ namespace Nyeoglike.Lib.Relations {
         }
 
         private bool ContainsA(A a) => _aToB.ContainsKey(a);
-        private bool ContainsB(B b) => _bToAs.ContainsKey(b);
 
         public bool Remove(KeyValuePair<A, B> kv) => Remove(kv.Key, kv.Value);
         public bool Remove(A a, B b) {
@@ -66,11 +54,6 @@ namespace Nyeoglike.Lib.Relations {
             }
 
             _aToB.Remove(a);
-            var as_ = _bToAs[b];
-            as_.Remove(a);
-            if (!as_.Any()) {
-                _bToAs.Remove(b);
-            }
             return true;
         }
 
@@ -82,33 +65,11 @@ namespace Nyeoglike.Lib.Relations {
             return null;
         }
 
-        private SortedSet<A> PopB(B b) {
-            _tick++;
-            if (_bToAs.Remove(b, out SortedSet<A> as_)) {
-                return as_;
-            }
-            return new SortedSet<A>();
-        }
-
         private Nullable<B> GetBFromA(A a) {
             if (_aToB.TryGetValue(a, out B b)) {
                 return b;
             }
             return null;
-        }
-
-        private Many<A> GetAsFromB(B b) => new ViewManyReverse(this, b);
-
-        private IEnumerable<A> AllAsFromB(B b) {
-            var _old = _tick;
-            if (_bToAs.TryGetValue(b, out SortedSet<A> as_)) {
-                foreach (var a in as_) {
-                    yield return a;
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
-                }
-            }
         }
 
         private IEnumerable<KeyValuePair<A, B>> AllAPairs() {
@@ -118,19 +79,6 @@ namespace Nyeoglike.Lib.Relations {
                 yield return ab;
                 if (_tick != _old) {
                     throw new InvalidOperationException("cannot iterate: underlying object changed");
-                }
-            }
-        }
-
-        private IEnumerable<KeyValuePair<B, A>> AllBPairs() {
-            var _old = _tick;
-
-            foreach (var bas in _bToAs) {
-                foreach (var a in bas.Value) {
-                    yield return new KeyValuePair<B, A>(bas.Key, a);
-                    if (_tick != _old) {
-                        throw new InvalidOperationException("cannot iterate: underlying object changed");
-                    }
                 }
             }
         }
@@ -150,14 +98,13 @@ namespace Nyeoglike.Lib.Relations {
         // public void UnionWith(IEnumerable<KeyValuePair<A, B>> other);
 
         public class ViewForward: ToOne<A, B> {
-            private ManyToOne<A, B> _this;
+            private UncheckedToOne<A, B> _this;
 
-            public ViewForward(ManyToOne<A, B> impl) {
+            public ViewForward(UncheckedToOne<A, B> impl) {
                 _this = impl;
             }
 
             public override bool ContainsKey(A a) => _this.ContainsA(a);
-            public bool ContainsValue(B b) => _this.ContainsB(b);
 
             public override Nullable<B> this[A a] {
                 get => _this.GetBFromA(a);
@@ -193,63 +140,6 @@ namespace Nyeoglike.Lib.Relations {
                     foreach(var ab in _this.AllAPairs()) {
                         yield return ab.Value;
                     }
-                }
-            }
-        }
-
-        public class ViewReverse: ToMany<B, A> {
-            private ManyToOne<A, B> _this;
-
-            public ViewReverse(ManyToOne<A, B> impl) {
-                _this = impl;
-            }
-
-            public override bool ContainsKey(B b) => _this.ContainsB(b);
-            public bool ContainsValue(A a) => _this.ContainsA(a);
-
-            public override Many<A> this[B b] => new ViewManyReverse(_this, b);
-
-            public override SortedSet<A> Pop(B b) => _this.PopB(b);
-
-            public override IEnumerator<KeyValuePair<B, A>> GetEnumerator() {
-                foreach (var ba in _this.AllBPairs()) {
-                    yield return ba;
-                }
-            }
-
-            public override IEnumerable<B> Keys {
-                get {
-                    foreach (var ba in _this.AllBPairs()) {
-                        yield return ba.Key;
-                    }
-                }
-            }
-
-            public override IEnumerable<A> Values {
-                get {
-                    foreach (var ba in _this.AllBPairs()) {
-                        yield return ba.Value;
-                    }
-                }
-            }
-        }
-
-        public class ViewManyReverse : Many<A> {
-            private ManyToOne<A, B> _this;
-            private B _b;
-
-            public ViewManyReverse(ManyToOne<A, B> impl, B b) {
-                _this = impl;
-                _b = b;
-            }
-
-            public override bool Add(A a) => _this.Add(a, _b);
-            public override bool Contains(A a) => _this.Contains(a, _b);
-            public override bool Remove(A a) => _this.Remove(a, _b);
-
-            public override IEnumerator<A> GetEnumerator() {
-                foreach (var a in _this.AllAsFromB(_b)) {
-                    yield return a;
                 }
             }
         }

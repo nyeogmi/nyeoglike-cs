@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib {
-    public struct V2 {
+    public struct V2: IComparable<V2>, IComparable {
         public int X, Y;
 
         public V2(int x, int y) {
@@ -62,9 +62,17 @@ namespace Nyeoglike.Lib {
             int yhc = Y.GetHashCode();
             return (xhc << 16) ^ yhc ^ (xhc >> 16);
         }
+
+        public int CompareTo(V2 other) {
+            var c1 = X.CompareTo(other.X);
+            if (c1 != 0) { return c1; }
+            return Y.CompareTo(other.Y);
+        }
+
+        public int CompareTo(object obj) => ((IComparable<V2>)this).CompareTo((V2)obj);
     }
 
-    public struct R2 {
+    public struct R2: IComparable<R2> {
         public V2 Top, Size;
 
         public R2(int x0, int y0, int x1, int y1) {
@@ -120,5 +128,13 @@ namespace Nyeoglike.Lib {
             int yhc = Size.GetHashCode();
             return (xhc << 8) ^ yhc ^ (xhc >> 24);
         }
+
+        public int CompareTo(R2 other) {
+            var c1 = Top.CompareTo(other.Top);
+            if (c1 != 0) { return c1; }
+            return Size.CompareTo(other.Size);
+        }
+
+        public int CompareTo(object obj) => ((IComparable<R2>)this).CompareTo((R2)obj);
     }
 }

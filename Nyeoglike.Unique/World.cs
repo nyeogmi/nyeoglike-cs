@@ -1,6 +1,11 @@
 ﻿using Nyeoglike.Lib;
-using Nyeoglike.Unique.Biology;
 using Nyeoglike.Unique.Events;
+using Nyeoglike.Unique.Level;
+using Nyeoglike.Unique.NPCSystems;
+using Nyeoglike.Unique.NPCSystems.Capitalism;
+using Nyeoglike.Unique.NPCSystems.Scheduling;
+using Nyeoglike.Unique.PlayerSystems;
+using Nyeoglike.Unique.QuestSystem;
 using Nyeoglike.Unique.Time;
 using Nyeoglike.Unique.WorldMap;
 using System;
@@ -11,12 +16,18 @@ using System.Threading.Tasks;
 
 namespace Nyeoglike.Unique {
     public class World {
+        public Challenges Challenges { get; private set; } = new();
         public Clock Clock { get; private set; } = new();
+        public Enterprises Enterprises { get; private set; } = new();
         public EventMonitors EventMonitors { get; private set; } = new();
         public Levels Levels { get; private set; } = new();
+        public NameGen NameGen { get; private set; } = new();
         public NPCs NPCs { get; private set; } = new();
         public Pushes Pushes { get; private set; } = new();
         public Rhythms Rhythms { get; private set; } = new();
+        public RNG RNG { get; private set; } = new();
+        public Schedules Schedules { get; private set; } = new();
+        public SceneFlags SceneFlags { get; private set; } = new();
 
         public LoadedLevel Level { get; private set; } = null;
         public Player Player { get; private set; } = new();
@@ -41,7 +52,7 @@ namespace Nyeoglike.Unique {
             if (!Clock.Started) {
                 Clock.Start();
                 Rhythms.AdvanceTime();
-                Schedules.CalculateSchedules();
+                Schedules.Calculate();
                 SceneFlags.Reset();
                 SceneFlags.PopulateFromSchedules();
             }
@@ -57,32 +68,19 @@ namespace Nyeoglike.Unique {
         }
 
         public void FollowNPC(ID<NPC> npc) {
-            ActivateLevel(Schedules.NextLocation(npc));
+            ActivateLocation(Schedules.Next.GetLocation(npc));
         }
 
         public void ActivateLocation(ID<Location> location) {
-            var spawns = (
-                from npc in NPCs.Table.Keys
-                where Schedules.NextLocation(npc) == location
-                select new SpawnNPC(npc, Schedules.NextSchedule(npc))
-            ).ToList();
+            var level = Levels.Get(location);
 
-            var lvl = Levels.Get(location);
-            ActivateLevel(location, lvl, spawns);
-        }
-
-        private void ActivateLevel(
-            ID<Location> location, 
-            UnloadedLevel level,
-            List<SpawnNPC> npcs
-        ) {
-            if (Level) {
-                // TODO: Save level status
+            if (Level != null) {
+                // TODO: Save previous level's status
             }
 
             Player.Pos = level.PlayerStart;
             Player.Cam = level.PlayerStart;
-            Level = level.Load(location, npcs);
+            Level = level.Load(location);
 
             // Notify them.
             Challenges.Scan();

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Nyeoglike.Lib.Relations {
     public class OneToOne<A, B>
-        where A: struct, IComparable<A>
-        where B: struct, IComparable<B>
+        where A: struct, IComparable // <A>
+        where B: struct, IComparable // <B>
     {
         private ulong _tick;
         private SortedDictionary<A, B> _aToB;
@@ -144,7 +144,7 @@ namespace Nyeoglike.Lib.Relations {
             }
 
             public override bool ContainsKey(A a) => _this.ContainsA(a);
-            public override bool ContainsValue(B b) => _this.ContainsB(b);
+            public bool ContainsValue(B b) => _this.ContainsB(b);
 
             public override Nullable<B> this[A a] {
                 get => _this.GetBFromA(a);
@@ -191,7 +191,7 @@ namespace Nyeoglike.Lib.Relations {
             }
 
             public override bool ContainsKey(B b) => _this.ContainsB(b);
-            public override bool ContainsValue(A a) => _this.ContainsA(a);
+            public bool ContainsValue(A a) => _this.ContainsA(a);
 
             public override Nullable<A> this[B b] {
                 get => _this.GetAFromB(b);

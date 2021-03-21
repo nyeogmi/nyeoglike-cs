@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nyeoglike.Unique {
+namespace Nyeoglike.Unique.PlayerSystems {
     public class Player {
         public string Name => "Nyeogmi";
 

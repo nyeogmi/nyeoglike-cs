@@ -1,4 +1,5 @@
 ﻿using Nyeoglike.Lib;
+using Nyeoglike.Unique.Level;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,11 @@ namespace Nyeoglike.Unique.WorldMap {
     public class Levels {
         private Table<Location> Table = new();
         private SortedDictionary<ID<Location>, UnloadedLevel> _generation = new();
+        private SortedDictionary<ZoneType, Realtor> _realtors = new();
 
         // TODO: Realtors
 
         public Levels() {
-
         }
 
         // TODO: Don't use Zone, just use Table.Add.

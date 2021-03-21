@@ -10,7 +10,6 @@ namespace Nyeoglike.Lib.Relations.Directional {
         where V: struct
     {
         public abstract bool ContainsKey(K k);
-        public abstract bool ContainsValue(V v);
         public abstract Many<V> this[K k] { get; }
         public abstract SortedSet<V> Pop(K k);
         public bool Remove(K k) { return Pop(k).Any(); }
@@ -24,28 +23,5 @@ namespace Nyeoglike.Lib.Relations.Directional {
         public abstract IEnumerable<V> Values { get; }
 
         // TODO: Other Dictionary methods
-    }
-
-    public abstract class Many<V> {
-        public abstract IEnumerator<V> GetEnumerator();
-
-        // TODO: Other Set methods
-        public abstract bool Add(V v);
-        public abstract bool Contains(V v);
-        public abstract bool Remove(V v);
-
-        // TODO: Implement
-        // public void Clear();
-        // public void ExceptWith(IEnumerable<V> other);
-        // public void IntersectWith(IEnumerable<V> other);
-        // public bool IsProperSubsetOf(IEnumerable<V> other);
-        // public bool IsProperSupersetOf(IEnumerable<V> other); 
-        // public bool IsSubsetOf(IEnumerable<V> other);
-        // public bool IsSupersetOf(IEnumerable<V> other); 
-        // public bool Overlaps(IEnumerable<V> other); 
-        // public int RemoveWhere(Predicate<V> match);
-        // public bool SetEquals(IEnumerable<V> other);
-        // public void SymmetricExceptWith(IEnumerable<V> other);
-        // public void UnionWith(IEnumerable<V> other);
     }
 }

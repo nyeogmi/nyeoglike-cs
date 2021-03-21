@@ -1,14 +1,14 @@
-﻿using Lib.Relations.Directional;
+﻿using Nyeoglike.Lib.Relations.Directional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lib.Relations {
+namespace Nyeoglike.Lib.Relations {
     public class OneToMany<A, B>
-        where A: struct, IComparable<A>
-        where B: struct, IComparable<B>
+        where A: struct, IComparable // <A>
+        where B: struct, IComparable // <B>
     {
         private ulong _tick;
         private SortedDictionary<A, SortedSet<B>> _aToBs;
@@ -156,7 +156,7 @@ namespace Lib.Relations {
             }
 
             public override bool ContainsKey(A a) => _this.ContainsA(a);
-            public override bool ContainsValue(B b) => _this.ContainsB(b);
+            public bool ContainsValue(B b) => _this.ContainsB(b);
 
             public override Many<B> this[A a] => _this.GetBsFromA(a);
 
@@ -193,7 +193,7 @@ namespace Lib.Relations {
             }
 
             public override bool ContainsKey(B b) => _this.ContainsB(b);
-            public override bool ContainsValue(A a) => _this.ContainsA(a);
+            public bool ContainsValue(A a) => _this.ContainsA(a);
 
             public override Nullable<A> this[B b] {
                 get => _this.GetAFromB(b);

@@ -12,7 +12,6 @@ namespace Nyeoglike.Lib.Relations.Directional {
         where V: struct
     {
         public abstract bool ContainsKey(K k);
-        public abstract bool ContainsValue(V v);
         public abstract Nullable<V> this[K k] { get; set; }
         public abstract Nullable<V> Pop(K k);
         
