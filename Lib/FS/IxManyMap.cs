@@ -88,6 +88,13 @@ namespace Nyeoglike.Lib.FS {
             set => _dictionary[k][i] = value;
         }
 
+        private int CountVsFromK(K k) {
+            if (_dictionary.TryGetValue(k, out List<V> vs)) { 
+                return vs.Count; 
+            }
+            return 0;
+        }
+
         private IEnumerable<V> AllVsFromK(K k) {
             var _old = _tick;
             if (_dictionary.TryGetValue(k, out List<V> vs)) {
@@ -139,6 +146,7 @@ namespace Nyeoglike.Lib.FS {
             public override bool Contains(int iv) => _this.ContainsIndex(_k, iv);
             public override bool Remove(int iv) => _this.RemoveIndex(_k, iv);
             public override bool Remove(int iv, out V v) => _this.RemoveIndex(_k, iv, out v);
+            public override int Count => _this.CountVsFromK(_k);
 
             public override V this[int i] {
                 get => _this[_k, i];

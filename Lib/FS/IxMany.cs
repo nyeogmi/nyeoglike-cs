@@ -11,6 +11,7 @@ namespace Nyeoglike.Lib.FS {
         public abstract bool Contains(int iv);
         public abstract bool Remove(int iv);
         public abstract bool Remove(int iv, out V v);
+        public abstract int Count { get; }
 
         public abstract V this[int i] { get; set; }
         public abstract bool TryGetValue(int i, out V v);

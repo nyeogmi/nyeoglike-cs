@@ -9,6 +9,7 @@ namespace Nyeoglike.Lib.FS {
         public abstract bool Add(V v);
         public abstract bool Contains(V v);
         public abstract bool Remove(V v);
+        public abstract int Count { get; }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

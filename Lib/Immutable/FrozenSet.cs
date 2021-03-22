@@ -23,6 +23,8 @@ namespace Nyeoglike.Lib.Immutable {
         // TODO: Provide methods that usually would mutate
         public bool Contains(T t) => _underlying.Contains(t);
 
+        public int Count => _array.Length;
+
         public IEnumerator<T> GetEnumerator() {
             foreach (var t in _underlying) {
                 yield return t;

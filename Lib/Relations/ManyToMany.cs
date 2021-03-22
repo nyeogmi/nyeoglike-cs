@@ -81,6 +81,7 @@ namespace Nyeoglike.Lib.Relations {
         private Many<B> GetBsFromA(A a) => new ViewManyForward(this, a);
         private Many<A> GetAsFromB(B b) => new ViewManyReverse(this, b);
 
+        private int CountBsFromA(A a) => _aToBs[a].Count;
         private IEnumerable<B> AllBsFromA(A a) {
             var _old = _tick;
             foreach (var b in _aToBs[a]) {
@@ -91,6 +92,7 @@ namespace Nyeoglike.Lib.Relations {
             }
         }
 
+        private int CountAsFromB(B b) => _bToAs[b].Count;
         private IEnumerable<A> AllAsFromB(B b) {
             var _old = _tick;
             foreach (var a in _bToAs[b]) {
@@ -223,6 +225,7 @@ namespace Nyeoglike.Lib.Relations {
             public override bool Add(B b) => _this.Add(_a, b);
             public override bool Contains(B b) => _this.Contains(_a, b);
             public override bool Remove(B b) => _this.Remove(_a, b);
+            public override int Count => _this.CountBsFromA(_a);
 
             public override IEnumerator<B> GetEnumerator() {
                 foreach (var b in _this.AllBsFromA(_a)) {
@@ -243,6 +246,7 @@ namespace Nyeoglike.Lib.Relations {
             public override bool Add(A a) => _this.Add(a, _b);
             public override bool Contains(A a) => _this.Contains(a, _b);
             public override bool Remove(A a) => _this.Remove(a, _b);
+            public override int Count => _this.CountAsFromB(_b);
 
             public override IEnumerator<A> GetEnumerator() {
                 foreach (var a in _this.AllAsFromB(_b)) {

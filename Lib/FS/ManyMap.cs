@@ -75,6 +75,13 @@ namespace Nyeoglike.Lib.FS {
             get => new ViewMany(this, k);
         }
 
+        private int CountVsFromK(K k) {
+            if (_dictionary.TryGetValue(k, out SortedSet<V> vs)) {
+                return vs.Count;
+            }
+            return 0;
+        }
+
         private IEnumerable<V> AllVsFromK(K k) {
             var _old = _tick;
             if (_dictionary.TryGetValue(k, out SortedSet<V> vs)) {
@@ -124,6 +131,7 @@ namespace Nyeoglike.Lib.FS {
             public override bool Add(V v) => _this.Add(_k, v);
             public override bool Contains(V v) => _this.Contains(_k, v);
             public override bool Remove(V v) => _this.Remove(_k, v);
+            public override int Count => _this.CountVsFromK(_k);
 
             public override IEnumerator<V> GetEnumerator() {
                 foreach (var b in _this.AllVsFromK(_k)) {

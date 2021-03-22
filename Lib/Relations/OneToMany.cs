@@ -87,6 +87,7 @@ namespace Nyeoglike.Lib.Relations {
             return null;
         }
 
+        private int CountBsFromA(A a) => _aToBs[a].Count;
         private IEnumerable<B> AllBsFromA(A a) {
             var _old = _tick;
             foreach (var b in _aToBs[a]) {
@@ -230,6 +231,7 @@ namespace Nyeoglike.Lib.Relations {
             public override bool Add(B b) => _this.Add(_a, b);
             public override bool Contains(B b) => _this.Contains(_a, b);
             public override bool Remove(B b) => _this.Remove(_a, b);
+            public override int Count => _this.CountBsFromA(_a);
 
             public override IEnumerator<B> GetEnumerator() {
                 foreach (var b in _this.AllBsFromA(_a)) {

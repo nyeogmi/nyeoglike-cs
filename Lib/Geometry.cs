@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -72,7 +73,7 @@ namespace Nyeoglike.Lib {
         public int CompareTo(object obj) => ((IComparable<V2>)this).CompareTo((V2)obj);
     }
 
-    public struct R2: IComparable<R2> {
+    public struct R2: IEnumerable<V2>, IComparable<R2>, IComparable {
         public V2 Top, Size;
 
         public R2(int x0, int y0, int x1, int y1) {
@@ -136,5 +137,19 @@ namespace Nyeoglike.Lib {
         }
 
         public int CompareTo(object obj) => ((IComparable<R2>)this).CompareTo((R2)obj);
+
+        public bool Contains(V2 v) =>
+            Top.X <= v.X && v.X < Top.X + Size.X && 
+            Top.Y <= v.Y && v.Y < Top.Y + Size.Y;
+
+        public IEnumerator<V2> GetEnumerator() {
+            for (var y = 0; y < Size.Y; y++) {
+                for (var x = 0; x < Size.X; x++) {
+                    yield return Top + new V2(x, y);
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
